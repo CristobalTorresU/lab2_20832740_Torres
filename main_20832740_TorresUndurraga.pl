@@ -202,3 +202,17 @@ systemLogin(SB,UserName,SA):-getNameSystem(SB,Name_system),
 	no_sesion_iniciada(SB,""),
 	SA=[Name_system,Fecha,Letra,UserName,Ruta,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+%dominios:
+%predicados:
+systemLogout(SB,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getRutaSystem(SB,Ruta),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	SA=[Name_system,Fecha,Letra,"",Ruta,Drives,Carpetas,Archivos,Users,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
