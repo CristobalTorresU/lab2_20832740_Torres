@@ -1,6 +1,6 @@
 %Clausulas Comunes
 insertarCola(E,[],[E]).
-insertarCola(E,[H|T],[H,Tout]):-insertarCola(E,T,Tout).
+insertarCola(E,[H|T],[H|Tout]):-insertarCola(E,T,Tout).
 
 %TDAs
 
@@ -55,7 +55,6 @@ getPapelera([_,_,_,_,_,_,_,_,_,Papelera],Papelera).
 %CONSTRUCTORES
 %predicado: 
 %dominio: 
-%recorrido: 
 drive(Letra,Nombre_Unidad,Capacidad,D):-string(Letra),
 	number(Capacidad),Capacidad>0,
 	string(Nombre_Unidad),
@@ -102,13 +101,11 @@ buscar_usuario([[_,_]|T],UserName):-string(UserName),
 	buscar_usuario(T,UserName).
 no_sesion_iniciada([_,_,_,Usuario,_,_,_,_,_,_],Usuario).
 
-
 %##############################################################################
 %TDA folder
 
 %predicado: 
 %dominio: 
-%recorrido: 
 folder(Ruta,Nombre_carpeta,Creador,Carpeta):-string(Nombre_carpeta),
 	date(Fecha_creacion),
 	string_concat(Ruta,Nombre_carpeta,Nombre),
@@ -146,7 +143,6 @@ buscar_carpeta([[_,_,_,_]|T],Nombre):-string(Nombre),
 
 %predicado: 
 %dominio: Name (string) x System
-%recorrido: System
 system(Name,System):-string(Name),
 	date(Date),
 	System=[Name,Date,"","","",[],[],[],[],[]],
@@ -154,7 +150,6 @@ system(Name,System):-string(Name),
 
 %predicado:
 %dominio: System x Letter (String) x Name (String) x Capacity (int) x System
-%recorrido: System
 systemAddDrive(SB,Letter,Name,Capacity,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -176,7 +171,6 @@ systemAddDrive(SB,Letter,Name,Capacity,SA):-getNameSystem(SB,Name_system),
 
 %predicado: 
 %dominio: 
-%recorrido: 
 systemRegister(SB,UserName,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -191,4 +185,20 @@ systemRegister(SB,UserName,SA):-getNameSystem(SB,Name_system),
 	not(buscar_usuario(Users,UserName)),
 	insertarCola(U,Users,NewUsers),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,Archivos,NewUsers,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+%predicados:
+%dominio:
+systemLogin(SB,UserName,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getRutaSystem(SB,Ruta),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	buscar_usuario(Users,UserName),
+	no_sesion_iniciada(SB,""),
+	SA=[Name_system,Fecha,Letra,UserName,Ruta,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
