@@ -216,3 +216,21 @@ systemLogout(SB,SA):-getNameSystem(SB,Name_system),
 	getPapelera(SB,Papelera),
 	SA=[Name_system,Fecha,Letra,"",Ruta,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+%dominios:
+%predicados:
+systemSwitchDrive(SB,Letter,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	string_lower(Letter,Letter_down),
+	string_concat(Letter_down,"/",Ruta),
+	buscar_drive(Drives,Letter_down),
+	not(buscar_drive(Drives,Letra)),
+	SA=[Name_system,Fecha,Letter_down,Usuario,Ruta,Drives,Carpetas,Archivos,Users,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
