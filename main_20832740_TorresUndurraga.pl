@@ -2,6 +2,19 @@
 insertarCola(E,[],[E]).
 insertarCola(E,[H|T],[H|Tout]):-insertarCola(E,T,Tout).
 
+%eliminarElemento(Elemento,ListaEntrante,ListaSalida)
+eliminarElemento(_,[],[]):-!.
+eliminarElemento(E,[E|T],Tout):-eliminarElemento(E,T,Tout),!.
+eliminarElemento(E,[H|T],[H|Tout]):-eliminarElemento(E,T,Tout).
+
+%eliminarUltimoElemento(L1,L2).
+eliminarUltimoElemento([_|[]],[]):-!.
+eliminarUltimoElemento([H|T],[H|Tout]):-eliminarUltimoElemento(T,Tout).
+
+%formarRuta(ListaNombres,Ruta).
+formarRuta(L,R):-atomic_list_concat(L,"/",S1),string_concat(S1,"/",R).
+
+
 %TDAs
 
 %##############################################################################
@@ -137,6 +150,58 @@ buscar_carpeta([[_,_,_,_]|T],Nombre):-string(Nombre),
 	buscar_carpeta(T,Nombre).
 
 %##############################################################################
+%FILE
+
+%constructor
+file(Filename,Contenido,File):-string(Filename),
+	string(Contenido),
+	date(Fecha),
+	File=[Filename,Contenido,Fecha].
+
+fileRuta(File,Ruta,[Ruta,File]).
+
+%selectores
+getFilename([Filename,_,_],Filename).
+getContenido([_,Contenido,_],Contenido).
+getFechaCreacion([_,_,Fecha],Fecha).
+
+
+%seleccionarArchivo(Name_d,Ruta,Archivos,File).
+
+seleccionarArchivo(Nombre,Ruta,[[Ruta,[Nombre,Contenido,Fecha]]|_],Archivo):-Archivo=[Ruta,[Nombre,Contenido,Fecha]],!.
+seleccionarArchivo(Nombre,Ruta,[_|T],Archivo):-seleccionarArchivo(Nombre,Ruta,T,Archivo).
+
+
+%modificadores
+%eliminarArchivo(Nombre,Ruta,Archivos,Archivos?).
+
+eliminarArchivo(_,_,[],[]):-!.
+eliminarArchivo(Nombre,Ruta,[[Ruta,[Nombre,_,_]]|T],Tout):-eliminarArchivo(Nombre,Ruta,T,Tout),!.
+eliminarArchivo(Nombre,Ruta,[H|T],[H|Tout]):-eliminarArchivo(Nombre,Ruta,T,Tout).
+
+modificarRutaArchivo([_,[Nombre,Contenido,Fecha]],Ruta,Archivo):-Archivo=[Ruta,[Nombre,Contenido,Fecha]].
+actualizarFechaArchivo([Ruta,[Nombre,Contenido,_]],Archivo):-date(D),
+	Archivo=[Ruta,[Nombre,Contenido,D]].
+
+%modificarNombreArchivo(File,NewName,NewFile).
+modificarNombreArchivo([Ruta,[_,Contenido,Fecha]],NewName,Archivo):-Archivo=[Ruta,[NewName,Contenido,Fecha]].
+
+%otras_operaciones
+buscar_archivo([[Ruta,[Filename,_,_]]|_],Ruta,Filename):-!.
+buscar_archivo([[_,[_,_,_]]|T],Ruta,Filename):-string(Filename),
+	string(Ruta),
+	buscar_archivo(T,Ruta,Filename).
+
+%seleccionarArchivoPorRuta(Ruta,ListaArchivos,ArchivosSeleccionados).
+
+seleccionarArchivosPorRuta(_,[],[]):-!.
+seleccionarArchivosPorRuta(Ruta1,[[Ruta2,_]|T],Tout):-Ruta1 \= Ruta2,seleccionarArchivosPorRuta(Ruta1,T,Tout),!.
+seleccionarArchivosPorRuta(Ruta,[H|T],[H|Tout]):-seleccionarArchivosPorRuta(Ruta,T,Tout).
+
+nombresArchivosRuta(_,[],_):-!.
+nombresArchivosRuta(Ruta1,[[Ruta2,[Nombre,_,_]]|T],Tout):-Ruta1 \= Ruta2,insertarCola(Nombre,Tout,Tin),nombresArchivosRuta(Ruta1,T,Tin),!.
+nombresArchivosRuta(Ruta,[H|T],[H|Tout]):-nombresArchivosRuta(Ruta,T,Tout).
+
 %------------------------------------------------------------------------------
 
 %FUNCIONES PRINCIPALES
@@ -259,6 +324,26 @@ systemMkdir(SB,Name,SA):-getNameSystem(SB,Name_system),
 
 %dominios:
 %predicados:
+
+%Para devolverse
+systemCd(SB,"..",SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getRutaSystem(SB,Ruta),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	split_string(Ruta,"/","/",Ruta2),
+	length(Ruta2,LargoRuta),
+	LargoRuta > 1,
+	eliminarUltimoElemento(Ruta2,Ruta3),
+	formarRuta(Ruta3,Ruta4),
+	SA=[Name_system,Fecha,Letra,Usuario,Ruta4,Drives,Carpetas,Archivos,Users,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
 %VERSIÓN_SIMPLE
 systemCd(SB,Name,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
