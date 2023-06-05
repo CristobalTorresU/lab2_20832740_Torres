@@ -344,6 +344,20 @@ systemCd(SB,"..",SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta4,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
+%Para devolverse a Root
+systemCd(SB,"/",SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	string_concat(Letra,":/",NewRuta),
+	SA=[Name_system,Fecha,Letra,Usuario,NewRuta,Drives,Carpetas,Archivos,Users,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
 %VERSIÓN_SIMPLE
 systemCd(SB,Name,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
