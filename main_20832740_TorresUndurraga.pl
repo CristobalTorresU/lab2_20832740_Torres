@@ -375,3 +375,22 @@ systemCd(SB,Name,SA):-getNameSystem(SB,Name_system),
 	buscar_carpeta(Carpetas,Name_ruta),
 	SA=[Name_system,Fecha,Letra,Usuario,Name_ruta,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+%dominios:
+%predicados:
+systemAddFile(SB,File,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getRutaSystem(SB,Ruta),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	getFilename(File,Filename),
+	not(buscar_archivo(Archivos,Ruta,Filename)),
+	fileRuta(File,Ruta,FileRuta),
+	insertarCola(FileRuta,Archivos,Archivos_new),
+	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,Archivos_new,Users,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
