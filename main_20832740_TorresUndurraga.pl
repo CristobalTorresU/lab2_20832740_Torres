@@ -394,3 +394,24 @@ systemAddFile(SB,File,SA):-getNameSystem(SB,Name_system),
 	insertarCola(FileRuta,Archivos,Archivos_new),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,Archivos_new,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+%dominios:
+%predicados:
+%SOLO ARCHIVOS
+systemDel(SB,Name,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getRutaSystem(SB,Ruta),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	string_lower(Name,Name_d),
+	buscar_archivo(Archivos,Ruta,Name_d),
+	eliminarArchivo(Name_d,Ruta,Archivos,NewArchivos),
+	seleccionarArchivo(Name_d,Ruta,Archivos,File),
+	insertarCola(File,Papelera,NewPapelera),
+	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,NewArchivos,Users,NewPapelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
