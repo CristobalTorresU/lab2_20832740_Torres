@@ -1,4 +1,15 @@
-%Clausulas Comunes
+%MODULOS
+:-use_module(system_20832740_TorresUndurraga).
+:-use_module(drive_20832740_TorresUndurraga).
+:-use_module(folder_20832740_TorresUndurraga).
+:-use_module(user_20832740_TorresUndurraga).
+:-use_module(file_20832740_TorresUndurraga).
+
+%##############################################################################
+
+%CLASULAS EXTRAS
+
+%insertarCola(Elemento,ListaEntrante,ListaSalida).
 insertarCola(E,[],[E]).
 insertarCola(E,[H|T],[H|Tout]):-insertarCola(E,T,Tout).
 
@@ -28,308 +39,17 @@ insertarLista([],[],[]):-!.
 insertarLista([H1|T1],[],[H1|T3]):-insertarLista(T1,[],T3),!.
 insertarLista(L,[H2|T2],[H2|T3]):-insertarLista(L,T2,T3).
 
-%TDAs
+%ultimoElemento(Lista,Elemento).
+ultimoElemento([T|[]],T):-!.
+ultimoElemento([_|T],E):-ultimoElemento(T,E).
+
+%invertir(Lista,ListaInvertida).
+invertir([],[]):-!.
+invertir(L,[Ultimo|T]):-ultimoElemento(L,Ultimo),eliminarUltimoElemento(L,LSinUltimo),invertir(LSinUltimo,T),!.
 
 %##############################################################################
 
-%TDA system
-%REPRESENTACIÓN
-/**/
-%PREDICADOS
-/*
-system(Name,S)
-getNameSystem(S,Name)
-getFechaSystem(S,Fecha)
-getLetraSystem(S,Letra_unidad)
-getUsuarioSystem(S,Usuario_actual)
-getRutaSystem(S,Ruta_actual)
-getDrives(S,Drives)
-getUsers(S,Users)
-getPapelera(S,Papelera)
-*/
-
-%CONSTRUCTORES
-%El constructor se encuentra entre las funciones prinpales
-
-%SELECTORES
-getNameSystem([Name,_,_,_,_,_,_,_,_,_],Name).
-getFechaSystem([_,Fecha,_,_,_,_,_,_,_,_],Fecha).
-getLetraSystem([_,_,Letra_unidad,_,_,_,_,_,_,_],Letra_unidad).
-getUsuarioSystem([_,_,_,Usuario_actual,_,_,_,_,_,_],Usuario_actual).
-getRutaSystem([_,_,_,_,Ruta_actual,_,_,_,_,_],Ruta_actual).
-getDrives([_,_,_,_,_,Drives,_,_,_,_],Drives).
-getCarpetas([_,_,_,_,_,_,Carpetas,_,_,_],Carpetas).
-getArchivos([_,_,_,_,_,_,_,Archivos,_,_],Archivos).
-getUsers([_,_,_,_,_,_,_,_,Users,_],Users).
-getPapelera([_,_,_,_,_,_,_,_,_,Papelera],Papelera).
-
-%MODIFICADORES
-
-%OTRAS OPERACIONES
-
-
-%##############################################################################
-
-%TDA drive
-%REPRESENTACIÓN
-/**/
-
-%PREDICADOS
-/*
-*/
-
-%CONSTRUCTORES
-%predicado: 
-%dominio: 
-drive(Letra,Nombre_Unidad,Capacidad,D):-string(Letra),
-	number(Capacidad),Capacidad>0,
-	string(Nombre_Unidad),
-	D=[Letra,Nombre_Unidad,Capacidad].
-
-%SELECTORES
-getLetraDrive([Letra,_,_],Letra).
-getNombreDrive([_,Nombre,_],Nombre).
-getCapacidadDrive([_,_,Capacidad],Capacidad).
-getPrimerDrive([Drive|_],Drive).
-getRestoDrives([_|Drives],Drives).
-
-%MODIFICADORES
-
-%OTRAS OPERACIONES
-buscar_drive([[Letra,_,_]|_],Letra).
-buscar_drive([[_,_,_]|T],Letra):-string(Letra),
-	buscar_drive(T,Letra).
-
-%##############################################################################
-
-%TDA user
-%REPRESENTACIÓN
-/**/
-
-%PREDICADOS
-/*
-*/
-
-%CONSTRUCTORES
-user(Nombre,U):-string(Nombre),
-	date(Date),
-	U=[Nombre,Date].
-
-%SELECTORES
-getNombreUser([Nombre,_],Nombre).
-
-%MODIFICADORES
-
-
-%OTRAS OPERACIONES
-buscar_usuario([[Username,_]|_],Username):-!.
-buscar_usuario([[_,_]|T],UserName):-string(UserName),
-	buscar_usuario(T,UserName).
-no_sesion_iniciada([_,_,_,Usuario,_,_,_,_,_,_],Usuario).
-
-%##############################################################################
-%TDA folder
-
-%predicado: 
-%dominio: 
-folder(Ruta,Nombre_carpeta,Creador,Carpeta):-string(Nombre_carpeta),
-	date(Fecha_creacion),
-	string_concat(Ruta,Nombre_carpeta,Nombre),
-	string_concat(Nombre,"/",Nombre_ruta),
-	Carpeta=[Nombre_ruta,Creador,Fecha_creacion,Fecha_creacion].
-
-%SELECTORES
-getNombreFolder([Nombre,_,_,_],Nombre).
-getCreadorFolder([_,Creador,_,_],Creador).
-getFechaCreacionFolder([_,_,Fecha_creacion,_],Fecha_creacion).
-getFechaModificacionFolder([_,_,_,Fecha_mod],Fecha_mod).
-getPrimeraCarpetaDrive([Carpeta|_],Carpeta).
-getRestoCarpetasDrive([_|Carpetas],Carpetas).
-
-%MODIFICADORES
-cambiarFechaModificacion(Carpeta,Nueva_carpeta):-getNombreFolder(Carpeta,Nombre),
-	getCreadorFolder(Carpeta,Creador),
-	getFechaCreacionFolder(Carpeta,Fecha_c),
-	date(Fecha_nueva),
-	getArchivosFolder(Carpeta,Archivos),
-	Nueva_carpeta=[Nombre,Creador,Fecha_c,Fecha_nueva,Archivos].
-
-%cambiarRutaCarpeta(CarpetaOriginal,Ruta,CarpetaSalida).
-modificarRutaCarpeta([_,Creador,FC,FM],Ruta,Carpeta):-Carpeta=[Ruta,Creador,FC,FM].
-
-%OTRAS OPERACIONES
-agregar_carpetas(Carpetas_old,Ruta,Creador,Nombre_carpeta,Carpetas_new):-folder(Ruta,Nombre_carpeta,Creador,Carpeta),
-	insertarCola(Carpeta,Carpetas_old,Carpetas_new).
-
-%buscar_carpeta().
-buscar_carpeta([[Nombre,_,_,_]|_],Nombre):-!.
-buscar_carpeta([[_,_,_,_]|T],Nombre):-string(Nombre),
-	buscar_carpeta(T,Nombre).
-
-%seleccionarCarpeta(RutaCarpeta,ListaCarpetas,Carpeta).
-seleccionarCarpeta(Ruta,[[Ruta,Creador,Fecha_creacion,Fecha_modificacion]|_],Carpeta):-Carpeta=[Ruta,Creador,Fecha_creacion,Fecha_modificacion],!.
-seleccionarCarpeta(Ruta,[_|T],Carpeta):-seleccionarCarpeta(Ruta,T,Carpeta).
-
-%carpetasPorRuta(Ruta,Carpetas,ListaCarpetasNuevas).
-carpetasPorRuta(_,[],[]):-!.
-carpetasPorRuta(_,[],_):-!.
-carpetasPorRuta(Ruta1,[[Ruta2,C,FC,FM]|T],Tout):-split_string(Ruta2,"/","/",ListaRuta),
-	not(sublista(Ruta1,ListaRuta)),
-	insertarCola([Ruta2,C,FC,FM],Tout,Tin),
-	carpetasPorRuta(Ruta1,T,Tin),!.
-carpetasPorRuta(Ruta,[H|T],[H|Tout]):-carpetasPorRuta(Ruta,T,Tout).
-
-
-%noCarpetasPorRuta(Ruta,Carpetas,ListaCarpetasNuevas).
-noCarpetasPorRuta(_,[],[]):-!.
-noCarpetasPorRuta(_,[],_):-!.
-noCarpetasPorRuta(Ruta1,[[Ruta2,C,FC,FM]|T],Tout):-split_string(Ruta2,"/","/",ListaRuta),
-	sublista(Ruta1,ListaRuta),
-	insertarCola([Ruta2,C,FC,FM],Tout,Tin),
-	noCarpetasPorRuta(Ruta1,T,Tin),!.
-noCarpetasPorRuta(Ruta,[H|T],[H|Tout]):-noCarpetasPorRuta(Ruta,T,Tout).
-
-%insertarCarpetas(ListaCarpetasNuevas,ListaCarpetasOriginales,ListaCarpetas).
-insertarCarpetas(LCN,[],LCN):-!.
-insertarCarpetas(LCN,[H|T],[H|Tout]):-insertarCarpetas(LCN,T,Tout).
-
-%modificarRutasCarpetas(ListaRutaNueva,N,ListaCarpetasOriginales,ListaNueva).
-modificarRutasCarpetas(_,_,[],[]):-!.
-modificarRutasCarpetas(LRN,N,[[Ruta,Creador,FC,FM]|T],[[NewRuta,Creador,FC,FM]|Tout]):-split_string(Ruta,"/","/",LRuta),
-	eliminarNelementos(N,LRuta,RutaSinFuente),
-	length(LRuta,N),
-	atomic_list_concat(RutaSinFuente,"/",Ruta1),
-	atom_string(Ruta1,Ruta2),
-	atomic_list_concat(LRN,"/",RN1),
-	string_concat(RN1,"/",RN2),
-	atom_string(RN2,NRN),
-	string_concat(NRN,Ruta2,NewRuta),
-	modificarRutasCarpetas(LRN,N,T,Tout).
-modificarRutasCarpetas(LRN,N,[[Ruta,Creador,FC,FM]|T],[[NewRuta,Creador,FC,FM]|Tout]):-split_string(Ruta,"/","/",LRuta),
-	eliminarNelementos(N,LRuta,RutaSinFuente),
-	atomic_list_concat(RutaSinFuente,"/",Ruta1),
-	atom_string(Ruta1,Ruta2),
-	atomic_list_concat(LRN,"/",RN1),
-	string_concat(RN1,"/",RN2),
-	atom_string(RN2,NRN),
-	string_concat(NRN,Ruta2,Ruta3),
-	string_concat(Ruta3,"/",NewRuta),
-	modificarRutasCarpetas(LRN,N,T,Tout).
-
-%eliminarCarpeta(Ruta,ListaCarpetasEntrante,ListaCarpetasSalida)
-eliminarCarpeta(_,[],[]):-!.
-eliminarCarpeta(E,[[E,_,_,_]|T],Tout):-eliminarCarpeta(E,T,Tout),!.
-eliminarCarpeta(E,[[Ruta,C,FC,FM]|T],[[Ruta,C,FC,FM]|Tout]):-E \= Ruta,eliminarCarpeta(E,T,Tout).
-
-%##############################################################################
-%FILE
-
-%CONSTRUCTOR
-file(Filename,Contenido,File):-string(Filename),
-	string(Contenido),
-	date(Fecha),
-	File=[Filename,Contenido,Fecha].
-
-fileRuta(File,Ruta,[Ruta,File]).
-
-%SELECTORES
-getFilename([Filename,_,_],Filename).
-getContenido([_,Contenido,_],Contenido).
-getFechaCreacion([_,_,Fecha],Fecha).
-
-
-%seleccionarArchivo(Name_d,Ruta,Archivos,File).
-seleccionarArchivo(Nombre,Ruta,[[Ruta,[Nombre,Contenido,Fecha]]|_],Archivo):-Archivo=[Ruta,[Nombre,Contenido,Fecha]],!.
-seleccionarArchivo(Nombre,Ruta,[_|T],Archivo):-seleccionarArchivo(Nombre,Ruta,T,Archivo).
-
-
-%MODIFICADORES
-%eliminarArchivo(Nombre,Ruta,Archivos,Archivos?).
-eliminarArchivo(_,_,[],[]):-!.
-eliminarArchivo(Nombre,Ruta,[[Ruta,[Nombre,_,_]]|T],Tout):-eliminarArchivo(Nombre,Ruta,T,Tout),!.
-eliminarArchivo(Nombre,Ruta,[H|T],[H|Tout]):-eliminarArchivo(Nombre,Ruta,T,Tout).
-
-modificarRutaArchivo([_,[Nombre,Contenido,Fecha]],Ruta,Archivo):-Archivo=[Ruta,[Nombre,Contenido,Fecha]].
-actualizarFechaArchivo([Ruta,[Nombre,Contenido,_]],Archivo):-date(D),
-	Archivo=[Ruta,[Nombre,Contenido,D]].
-
-%modificarNombreArchivo(File,NewName,NewFile).
-modificarNombreArchivo([Ruta,[_,Contenido,Fecha]],NewName,Archivo):-Archivo=[Ruta,[NewName,Contenido,Fecha]].
-
-%OTRAS OPERACIONES
-buscar_archivo([[Ruta,[Filename,_,_]]|_],Ruta,Filename):-!.
-buscar_archivo([[_,[_,_,_]]|T],Ruta,Filename):-string(Filename),
-	string(Ruta),
-	buscar_archivo(T,Ruta,Filename).
-
-%seleccionarArchivoPorRuta(Ruta,ListaArchivos,ArchivosSeleccionados).
-seleccionarArchivosPorRuta(_,[],[]):-!.
-seleccionarArchivosPorRuta(Ruta1,[[Ruta2,_]|T],Tout):-Ruta1 \= Ruta2,seleccionarArchivosPorRuta(Ruta1,T,Tout),!.
-seleccionarArchivosPorRuta(Ruta,[H|T],[H|Tout]):-seleccionarArchivosPorRuta(Ruta,T,Tout).
-
-%seleccionarArchivoPorRuta(Ruta,ListaArchivos,ArchivosSeleccionados).
-seleccionarArchivosPorRuta(_,[],[]):-!.
-seleccionarArchivosPorRuta(Ruta1,[[Ruta2,_]|T],Tout):-Ruta1 \= Ruta2,seleccionarArchivosPorRuta(Ruta1,T,Tout),!.
-seleccionarArchivosPorRuta(Ruta,[H|T],[H|Tout]):-seleccionarArchivosPorRuta(Ruta,T,Tout).
-
-%nombresArchivosRuta().
-nombresArchivosRuta(_,[],_):-!.
-nombresArchivosRuta(Ruta1,[[Ruta2,[Nombre,_,_]]|T],Tout):-Ruta1 \= Ruta2,insertarCola(Nombre,Tout,Tin),nombresArchivosRuta(Ruta1,T,Tin),!.
-nombresArchivosRuta(Ruta,[H|T],[H|Tout]):-nombresArchivosRuta(Ruta,T,Tout).
-
-%archivosDeCarpetas(Carpetas,Archivos,NewArchivos).
-archivosDeCarpetas([],_,_):-!.
-archivosDeCarpetas([[Ruta,_,_,_]|T],Archivos,Tin):-seleccionarArchivosPorRuta(Ruta,Archivos,ArchivosSeleccionados),
-	insertarLista(ArchivosSeleccionados,Tin,Tout),archivosDeCarpetas(T,Archivos,Tout),!.
-
-%insertarArchivos(ListaArchivosNuevos,ListaArchivosOriginales,ListaArchivos).
-insertarArchivos(LCN,[],LCN):-!.
-insertarArchivos(LCN,[H|T],[H|Tout]):-insertarArchivos(LCN,T,Tout).
-
-%archivosPorRuta(Ruta,Archivos,ListaArchivosNuevos).
-archivosPorRuta(_,[],[]):-!.
-archivosPorRuta(_,[],_):-!.
-archivosPorRuta(Ruta1,[[Ruta2,[Nombre,Contenido,FC]]|T],Tout):-split_string(Ruta2,"/","/",ListaRuta),
-	not(sublista(Ruta1,ListaRuta)),
-	insertarCola([Ruta2,[Nombre,Contenido,FC]],Tout,Tin),
-	archivosPorRuta(Ruta1,T,Tin),!.
-archivosPorRuta(Ruta,[H|T],[H|Tout]):-archivosPorRuta(Ruta,T,Tout).
-
-%noArchivosPorRuta(Ruta,Archivos,ListaArchivosNuevos).
-noArchivosPorRuta(_,[],[]):-!.
-noArchivosPorRuta(_,[],_):-!.
-noArchivosPorRuta(Ruta1,[[Ruta2,[Nombre,Contenido,FC]]|T],Tout):-split_string(Ruta2,"/","/",ListaRuta),
-	sublista(Ruta1,ListaRuta),
-	insertarCola([Ruta2,[Nombre,Contenido,FC]],Tout,Tin),
-	noArchivosPorRuta(Ruta1,T,Tin),!.
-noArchivosPorRuta(Ruta,[H|T],[H|Tout]):-noArchivosPorRuta(Ruta,T,Tout).
-
-%modificarRutasArchivos().
-modificarRutasArchivos(_,_,[],[]):-!.
-modificarRutasArchivos(LRN,N,[[Ruta,[Nombre,Contenido,FC]]|T],[[NewRuta,[Nombre,Contenido,FC]]|Tout]):-split_string(Ruta,"/","/",LRuta),
-	eliminarNelementos(N,LRuta,RutaSinFuente),
-	length(LRuta,N),
-	atomic_list_concat(RutaSinFuente,"/",Ruta1),
-	atom_string(Ruta1,Ruta2),
-	atomic_list_concat(LRN,"/",RN1),
-	string_concat(RN1,"/",RN2),
-	atom_string(RN2,NRN),
-	string_concat(NRN,Ruta2,NewRuta),
-	modificarRutasArchivos(LRN,N,T,Tout).
-modificarRutasArchivos(LRN,N,[[Ruta,[Nombre,Contenido,FC]]|T],[[NewRuta,[Nombre,Contenido,FC]]|Tout]):-split_string(Ruta,"/","/",LRuta),
-	eliminarNelementos(N,LRuta,RutaSinFuente),
-	atomic_list_concat(RutaSinFuente,"/",Ruta1),
-	atom_string(Ruta1,Ruta2),
-	atomic_list_concat(LRN,"/",RN1),
-	string_concat(RN1,"/",RN2),
-	atom_string(RN2,NRN),
-	string_concat(NRN,Ruta2,Ruta3),
-	string_concat(Ruta3,"/",NewRuta),
-	modificarRutasArchivos(LRN,N,T,Tout).
-
-%------------------------------------------------------------------------------
-
-%FUNCIONES PRINCIPALES
+%REQUERIMIENTOS FUNCIONALES
 
 %predicado: 
 %dominio: Name (string) x System
@@ -338,8 +58,6 @@ system(Name,System):-string(Name),
 	System=[Name,Date,"","","",[],[],[],[],[]],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%predicado:
-%dominio: System x Letter (String) x Name (String) x Capacity (int) x System
 systemAddDrive(SB,Letter,Name,Capacity,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -360,8 +78,6 @@ systemAddDrive(SB,Letter,Name,Capacity,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,NewDrives,Carpetas_new,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%predicado: 
-%dominio: 
 systemRegister(SB,UserName,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -377,9 +93,7 @@ systemRegister(SB,UserName,SA):-getNameSystem(SB,Name_system),
 	insertarCola(U,Users,NewUsers),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,Archivos,NewUsers,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
-
-%predicados:
-%dominio:
+	
 systemLogin(SB,UserName,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -394,8 +108,6 @@ systemLogin(SB,UserName,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,UserName,Ruta,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%dominios:
-%predicados:
 systemLogout(SB,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -408,8 +120,6 @@ systemLogout(SB,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,"",Ruta,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%dominios:
-%predicados:
 systemSwitchDrive(SB,Letter,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -422,12 +132,10 @@ systemSwitchDrive(SB,Letter,SA):-getNameSystem(SB,Name_system),
 	string_lower(Letter,Letter_down),
 	string_concat(Letter_down,":/",Ruta),
 	buscar_drive(Drives,Letter_down),
-	not(buscar_drive(Drives,Letra)),
+	Letter_down \= Letra,
 	SA=[Name_system,Fecha,Letter_down,Usuario,Ruta,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%dominios:
-%predicados:
 systemMkdir(SB,Name,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -447,10 +155,8 @@ systemMkdir(SB,Name,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas_new,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%dominios:
-%predicados:
-
-%Para devolverse a la ruta anterior
+%SYSTEMCD
+%RETROCEDER ".."
 systemCd(SB,"..",SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -469,7 +175,7 @@ systemCd(SB,"..",SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta4,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%Para devolverse a Root
+%VOLVER A ROOT "/"
 systemCd(SB,"/",SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -483,7 +189,7 @@ systemCd(SB,"/",SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,NewRuta,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%VERSIÓN SIMPLE
+%SIMPLE ########
 systemCd(SB,Name,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -501,8 +207,6 @@ systemCd(SB,Name,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Name_ruta,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%dominios:
-%predicados:
 systemAddFile(SB,File,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -520,10 +224,10 @@ systemAddFile(SB,File,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,Archivos_new,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%dominios:
-%predicados:
 
-%Carpetas
+%SYSTEMDEL
+
+%CARPETAS
 systemDel(SB,Name,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -548,7 +252,7 @@ systemDel(SB,Name,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,CarpetasDejar,ArchivosDejar,Users,Papelera3],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%Archivos
+%ARCHIVOS
 systemDel(SB,Name,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -565,4 +269,353 @@ systemDel(SB,Name,SA):-getNameSystem(SB,Name_system),
 	seleccionarArchivo(Name_d,Ruta,Archivos,File),
 	insertarCola(File,Papelera,NewPapelera),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,NewArchivos,Users,NewPapelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+%SYSTEMCOPY
+
+%CARPETAS
+systemCopy(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getRutaSystem(SB,Ruta),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	string_lower(Source,Source_d),
+	string_lower(TargetPath,TargetPath_d),
+	string_concat(Ruta,Source_d,RutaSource1),
+	string_concat(RutaSource1,"/",RutaSource2),
+	buscar_carpeta(Carpetas,RutaSource2),
+	buscar_carpeta(Carpetas,TargetPath_d),
+	string_concat(TargetPath_d,Source_d,TPD),
+	string_concat(TPD,"/",Target),
+	not(buscar_carpeta(Carpetas,Target)),
+	split_string(RutaSource2,"/","/",RutaLista),
+	carpetasPorRuta(RutaLista,Carpetas,CarpetasPorCopiar),
+	archivosPorRuta(RutaLista,Archivos,ArchivosPorCopiar),
+	split_string(Target,"/","/",TargetLista),
+	length(RutaLista,N),
+	modificarRutasCarpetas(TargetLista,N,CarpetasPorCopiar,CarpetasListas),
+	modificarRutasArchivos(TargetLista,N,ArchivosPorCopiar,ArchivosListos),
+	insertarCarpetas(CarpetasListas,Carpetas,NewCarpetas),
+	insertarArchivos(ArchivosListos,Archivos,NewArchivos),
+	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,NewCarpetas,NewArchivos,Users,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+%ARCHIVOS
+systemCopy(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getRutaSystem(SB,Ruta),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	string_lower(Source,Source_d),
+	string_lower(TargetPath,TargetPath_d),
+	buscar_archivo(Archivos,Ruta,Source_d),
+	buscar_carpeta(Carpetas,TargetPath_d),
+	not(buscar_archivo(Archivos,TargetPath_d,Source_d)),
+	seleccionarArchivo(Source_d,Ruta,Archivos,File),
+	modificarRutaArchivo(File,TargetPath_d,File2),
+	actualizarFechaArchivo(File2,File3),
+	insertarCola(File3,Archivos,NewArchivos),
+	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,NewArchivos,Users,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+%SYSTEMMOVE
+
+%ARREGLAR MOVERLA A SI MISMA
+
+%CARPETAS
+systemMove(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getRutaSystem(SB,Ruta),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	string_lower(Source,Source_d),
+	string_lower(TargetPath,TargetPath_d),
+	string_concat(Ruta,Source_d,RutaSource1),
+	string_concat(RutaSource1,"/",RutaSource2),
+	buscar_carpeta(Carpetas,RutaSource2),
+	buscar_carpeta(Carpetas,TargetPath_d),
+	string_concat(TargetPath_d,Source_d,TPD),
+	string_concat(TPD,"/",Target),
+	not(buscar_carpeta(Carpetas,Target)),
+	split_string(RutaSource2,"/","/",RutaLista),
+	carpetasPorRuta(RutaLista,Carpetas,CarpetasPorMover),
+	archivosPorRuta(RutaLista,Archivos,ArchivosPorMover),
+	split_string(Target,"/","/",TargetLista),
+	length(RutaLista,N),
+	noCarpetasPorRuta(RutaLista,Carpetas,CarpetasPorUsar),
+	noArchivosPorRuta(RutaLista,Archivos,ArchivosPorUsar),
+	modificarRutasCarpetas(TargetLista,N,CarpetasPorMover,CarpetasListas),
+	modificarRutasArchivos(TargetLista,N,ArchivosPorMover,ArchivosListos),
+	insertarCarpetas(CarpetasListas,CarpetasPorUsar,NewCarpetas),
+	insertarArchivos(ArchivosListos,ArchivosPorUsar,NewArchivos),
+	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,NewCarpetas,NewArchivos,Users,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+%ARCHIVOS
+systemMove(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getRutaSystem(SB,Ruta),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	string_lower(Source,Source_d),
+	string_lower(TargetPath,TargetPath_d),
+	buscar_archivo(Archivos,Ruta,Source_d),
+	buscar_carpeta(Carpetas,TargetPath_d),
+	not(buscar_archivo(Archivos,TargetPath_d,Source_d)),
+	seleccionarArchivo(Source_d,Ruta,Archivos,File),
+	modificarRutaArchivo(File,TargetPath_d,File2),
+	actualizarFechaArchivo(File2,File3),
+	eliminarArchivo(Source_d,Ruta,Archivos,Archivos_eliminado),
+	insertarCola(File3,Archivos_eliminado,NewArchivos),
+	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,NewArchivos,Users,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+
+%SYSTEMREN
+
+%CARPETAS
+systemRen(SB,CurrentName,NewName,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getRutaSystem(SB,Ruta),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	string_lower(CurrentName,CurrentName_d),
+	string_lower(NewName,NewName_d),
+	string_concat(Ruta,CurrentName_d,Ruta1),
+	string_concat(Ruta1,"/",Ruta2),
+	buscar_carpeta(Carpetas,Ruta2),
+	string_concat(Ruta,NewName_d,NewName2),
+	string_concat(NewName2,"/",NewName3),
+	not(buscar_carpeta(Carpetas,NewName3)),
+	split_string(Ruta2,"/","/",RutaLista),
+	carpetasPorRuta(RutaLista,Carpetas,CarpetasPorModificar),
+	archivosPorRuta(RutaLista,Archivos,ArchivosPorModificar),
+	split_string(NewName3,"/","/",ListaNewName),
+	length(RutaLista,N),
+	noCarpetasPorRuta(RutaLista,Carpetas,CarpetasPorUsar),
+	noArchivosPorRuta(RutaLista,Archivos,ArchivosPorUsar),
+	modificarRutasCarpetas(ListaNewName,N,CarpetasPorModificar,CarpetasListas),
+	modificarRutasArchivos(ListaNewName,N,ArchivosPorModificar,ArchivosListos),
+	insertarCarpetas(CarpetasListas,CarpetasPorUsar,NewCarpetas),
+	insertarArchivos(ArchivosListos,ArchivosPorUsar,NewArchivos),
+	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,NewCarpetas,NewArchivos,Users,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+%ARCHIVOS
+systemRen(SB,CurrentName,NewName,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getRutaSystem(SB,Ruta),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	string_lower(CurrentName,CurrentName_d),
+	string_lower(NewName,NewName_d),
+	buscar_archivo(Archivos,Ruta,CurrentName_d),
+	not(buscar_archivo(Archivos,Ruta,NewName_d)),
+	seleccionarArchivo(CurrentName_d,Ruta,Archivos,File),
+	modificarNombreArchivo(File,NewName_d,NewFile),
+	eliminarArchivo(CurrentName_d,Ruta,Archivos,Archivos_eliminado),
+	insertarCola(NewFile,Archivos_eliminado,NewArchivos),
+	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,NewArchivos,Users,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+
+%SYSTEMDIR
+
+%VERSIÓN_SIMPLE
+systemDir(Sys,[],String):-getRutaSystem(Sys,Ruta),
+	getCarpetas(Sys,Carpetas),
+	getArchivos(Sys,Archivos),
+	split_string(Ruta,"/","/",RutaLista),
+	length(RutaLista,N),
+	carpetasPorRuta(RutaLista,Carpetas,CarpetasSeleccionadas),
+	subdirectoriosDirectos(CarpetasSeleccionadas,N,ListaNombresCarpetas),
+	nombresArchivosRuta(Ruta,Archivos,ListaNombresArchivos),
+	insertarLista(ListaNombresArchivos,ListaNombresCarpetas,ListaNombres),
+	oculto(ListaNombres,ListaNoOcultos),
+	atomic_list_concat(ListaNoOcultos,"\n",String_atomo1),
+	atom_string(String_atomo1,StringN),
+	string_concat("\n",StringN,String),
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+%Opción: "/a"
+systemDir(Sys,["/a"],String):-getRutaSystem(Sys,Ruta),
+	getCarpetas(Sys,Carpetas),
+	getArchivos(Sys,Archivos),
+	split_string(Ruta,"/","/",RutaLista),
+	length(RutaLista,N),
+	carpetasPorRuta(RutaLista,Carpetas,CarpetasSeleccionadas),
+	subdirectoriosDirectos(CarpetasSeleccionadas,N,ListaNombresCarpetas),
+	nombresArchivosRuta(Ruta,Archivos,ListaNombresArchivos),
+	insertarLista(ListaNombresArchivos,ListaNombresCarpetas,ListaNombres),
+	atomic_list_concat(ListaNombres,"\n",String_atomo1),
+	atom_string(String_atomo1,StringN),
+	string_concat("\n",StringN,String),
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+/*
+%Opción: "/s"
+systemDir(Sys,["/s"],String):-getRutaSystem(Sys,Ruta),
+	getCarpetas(Sys,Carpetas),
+	getArchivos(Sys,Archivos),
+	
+	split_string(Ruta,"/","/",RutaLista),
+	length(RutaLista,N),
+	carpetasPorRuta(RutaLista,Carpetas,CarpetasSeleccionadas),
+	%archivosPorRuta(RutaLista,Archivos,ArchivosPorMover),
+
+	subdirectoriosDirectos(CarpetasSeleccionadas,N,ListaNombresCarpetas),
+
+	nombresArchivosRuta(Ruta,Archivos,ListaNombresArchivos),
+	insertarLista(ListaNombresArchivos,ListaNombresCarpetas,ListaNombres),
+	atomic_list_concat(ListaNombres,"\n",String_atomo1),
+	atom_string(String_atomo1,StringN),
+	string_concat("\n",StringN,String),
+	
+	%String = [Carpetas1],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+*/
+/*
+%Opción: "/s /a"
+systemDir(Sys,["/s"],String):-getRutaSystem(Sys,Ruta),
+	getCarpetas(Sys,Carpetas),
+	getArchivos(Sys,Archivos),
+	
+	split_string(Ruta,"/","/",RutaLista),
+	length(RutaLista,N),
+	carpetasPorRuta(RutaLista,Carpetas,CarpetasSeleccionadas),
+	%archivosPorRuta(RutaLista,Archivos,ArchivosPorMover),
+
+	subdirectoriosDirectos(CarpetasSeleccionadas,N,ListaNombresCarpetas),
+
+	nombresArchivosRuta(Ruta,Archivos,ListaNombresArchivos),
+	insertarLista(ListaNombresArchivos,ListaNombresCarpetas,ListaNombres),
+	atomic_list_concat(ListaNombres,"\n",String_atomo1),
+	atom_string(String_atomo1,StringN),
+	string_concat("\n",StringN,String),
+	
+	%String = [Carpetas1],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+*/
+
+%Opción: "/o N"
+systemDir(Sys,["/o N"],String):-getRutaSystem(Sys,Ruta),
+	getCarpetas(Sys,Carpetas),
+	getArchivos(Sys,Archivos),
+	split_string(Ruta,"/","/",RutaLista),
+	length(RutaLista,N),
+	carpetasPorRuta(RutaLista,Carpetas,CarpetasSeleccionadas),
+	subdirectoriosDirectos(CarpetasSeleccionadas,N,ListaNombresCarpetas),
+	nombresArchivosRuta(Ruta,Archivos,ListaNombresArchivos),
+	insertarLista(ListaNombresArchivos,ListaNombresCarpetas,ListaNombres),
+	oculto(ListaNombres,ListaNoOcultos),
+	sort(ListaNoOcultos,ListaNombresFinal),
+	atomic_list_concat(ListaNombresFinal,"\n",String_atomo1),
+	atom_string(String_atomo1,StringN),
+	string_concat("\n",StringN,String),
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+%Opción: "/o -N"
+systemDir(Sys,["/o -N"],String):-getRutaSystem(Sys,Ruta),
+	getCarpetas(Sys,Carpetas),
+	getArchivos(Sys,Archivos),
+	split_string(Ruta,"/","/",RutaLista),
+	length(RutaLista,N),
+	carpetasPorRuta(RutaLista,Carpetas,CarpetasSeleccionadas),
+	subdirectoriosDirectos(CarpetasSeleccionadas,N,ListaNombresCarpetas),
+	nombresArchivosRuta(Ruta,Archivos,ListaNombresArchivos),
+	insertarLista(ListaNombresArchivos,ListaNombresCarpetas,ListaNombres),
+	oculto(ListaNombres,ListaNoOcultos),
+	sort(ListaNoOcultos,ListaOrdenada),
+	invertir(ListaOrdenada,ListaInvertida),
+	atomic_list_concat(ListaInvertida,"\n",String_atomo1),
+	atom_string(String_atomo1,StringN),
+	string_concat("\n",StringN,String),
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+
+%SYSTEMFORMAT
+
+%Formatea la unidad actual
+systemFormat(SB,Letter,Name,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	string_lower(Letter,Letra),
+	buscar_drive(Drives,Letra),
+	string_concat(Letra,":/",Root),
+	split_string(Root,"/","/",RutaLista),
+	noCarpetasPorRuta(RutaLista,Carpetas,CarpetasSinUnidad),
+	noArchivosPorRuta(RutaLista,Archivos,NewArchivos),
+	seleccionarDrive(Letra,Drives,Unidad),
+	getCapacidadDrive(Unidad,Size),
+	eliminarDrive(Letra,Drives,UnidadesSinSeleccionado),
+	drive(Letra,Name,Size,NuevaUnidad),
+	folder(Letra,":",Usuario,RootFolder),
+	insertarCola(NuevaUnidad,UnidadesSinSeleccionado,NewDrives),
+	insertarCola(RootFolder,CarpetasSinUnidad,NewCarpetas),
+	SA=[Name_system,Fecha,Letra,Usuario,Root,NewDrives,NewCarpetas,NewArchivos,Users,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+%Formatea otra unidad
+systemFormat(SB,Letter,Name,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getRutaSystem(SB,Ruta),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	string_lower(Letter,Letter_d),
+	Letter_d \= Letra,
+	buscar_drive(Drives,Letter_d),
+	string_concat(Letter_d,":/",Root),
+	split_string(Root,"/","/",RutaLista),
+	noCarpetasPorRuta(RutaLista,Carpetas,CarpetasSinUnidad),
+	noArchivosPorRuta(RutaLista,Archivos,NewArchivos),
+	seleccionarDrive(Letter_d,Drives,Unidad),
+	getCapacidadDrive(Unidad,Size),
+	eliminarDrive(Letter_d,Drives,UnidadesSinSeleccionado),
+	drive(Letter_d,Name,Size,NuevaUnidad),
+	folder(Letter_d,":",Usuario,RootFolder),
+	insertarCola(NuevaUnidad,UnidadesSinSeleccionado,NewDrives),
+	insertarCola(RootFolder,CarpetasSinUnidad,NewCarpetas),
+	SA=[Name_system,Fecha,Letra,Usuario,Ruta,NewDrives,NewCarpetas,NewArchivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
