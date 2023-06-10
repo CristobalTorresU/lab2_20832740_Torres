@@ -1,25 +1,49 @@
 %MODULOS
-:-module(user_20832740_TorresUndurraga,[user/2,getNombreUser/2,getPrimerUser/2,getRestoUsers/2,buscar_usuario/2,no_sesion_iniciada/2]).
+:-module(user_20832740_TorresUndurraga,[user/2,getNombreUser/2,buscar_usuario/2,no_sesion_iniciada/2]).
 
 %##############################################################################
 
 %TDA user
+/*
+REPRESENTACIÓN:
+
+*/
+/*
+Predicados:
+user(Nombre,User).
+getNombreUser(User,Nombre).
+buscar_usuario(Usuarios,Username).
+no_sesion_iniciada(System,Usuario).
+*/
+/*
+Metas:
+Principales: user
+Secundarias: getNombreUser,buscar_usuario,no_sesion_iniciada.
+*/
 
 %CONSTRUCTOR
-user(Nombre,U):-string(Nombre),
+
+%Descripción: Construye un user (usuario).
+%Dominios: Nombre (String) x User
+user(Nombre,User):-string(Nombre),
 	date(Date),
-	U=[Nombre,Date].
+	User=[Nombre,Date].
 
 %SELECTORES
+
+%Descripción: Selecciona el nombre de un user.
+%Dominios: User x Nombre (String).
 getNombreUser([Nombre,_],Nombre).
-getPrimerUser([_,_,_,_,_,_,[User|_],_],User).
-getRestoUsers([_,_,_,_,_,_,[_|Users],_],Users).
+
 
 %OTRAS OPERACIONES
-%buscar_usuario().
+
+%Descripción: Busca si existe un usuario en una lista de usuarios mediante el nombre de usuario.
+%Dominios: Users (Lista de users) x Username (String).
 buscar_usuario([[Username,_]|_],Username):-!.
 buscar_usuario([[_,_]|T],UserName):-string(UserName),
 	buscar_usuario(T,UserName).
 
-%no_sesion_iniciada()
+%Descripción: Verifica que no exista una sesión iniciada.
+%Dominios: System x Usuario (user).
 no_sesion_iniciada([_,_,_,Usuario,_,_,_,_,_,_],Usuario).

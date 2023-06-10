@@ -1,4 +1,4 @@
-%MODULOS
+%MÓDULOS
 :-use_module(system_20832740_TorresUndurraga).
 :-use_module(drive_20832740_TorresUndurraga).
 :-use_module(folder_20832740_TorresUndurraga).
@@ -49,15 +49,94 @@ invertir(L,[Ultimo|T]):-ultimoElemento(L,Ultimo),eliminarUltimoElemento(L,LSinUl
 
 %##############################################################################
 
+/*
+Predicados:
+system(SA,Name,SB).
+systemAddDrive(SA,Letter,Name,Capacity,SB).
+systemRegister(SA,UserName,SB).
+systemLogin(SA,UserName,SB).
+systemLogout(SA,SB).
+systemSwitchDrive(SA,Letter,SB).
+systemMkdir(SA,Name,SB).
+systemCd(SA,Name,SB).
+systemAddFile(SA,File,SB).
+systemDel(SA,Name,SB).
+systemCopy(SA,Source,TargetPath,SB).
+systemMove(SA,Source,TargetPath,SB).
+systemRen(SA,CurrentName,NewName,SB).
+systemDir(SA,Params,String).
+systemFormat(SA,Letter,SB).
+get_time(Date).
+getNameSystem(System,Name).
+getFechaSystem(System,Fecha).
+getLetraSystem(System,Letra).
+getUsuarioSystem(System,Usuario).
+getRutaSystem(System,Ruta).
+getDrives(System,Drives).
+getCarpetas(System,Carpetas).
+getArchivos(System,Archivos).
+getUsers(System,Users).
+getPapelera(System,Papelera).
+drive(Letra,Nombre_Unidad,Capacidad,Drive).
+buscar_drive(Drives,Letra).
+insertarCola(Elemento,ListaEntrante,ListaSalida).
+folder(Ruta,Nombre_carpeta,Creador,Carpeta).
+user(Nombre,User).
+buscar_usuario(Usuarios,Username).
+buscar_carpeta(Carpetas,Nombre).
+eliminarUltimoElemento(L1,L2).
+formarRuta(ListaNombres,Ruta).
+fileRuta(File,Ruta,FileRuta).
+carpetasPorRuta(Ruta,Carpetas,ListaCarpetasNuevas).
+archivosPorRuta(Ruta,Archivos,ListaArchivosNuevos).
+noCarpetasPorRuta(Ruta,Carpetas,ListaCarpetasNuevas).
+noArchivosPorRuta(Ruta,Archivos,ListaArchivosNuevos).
+insertarCarpetas(ListaCarpetasNuevas,ListaCarpetasOriginales,ListaCarpetas).
+insertarArchivos(ListaArchivosNuevos,ListaArchivosOriginales,ListaArchivos).
+eliminarArchivo(Nombre,Ruta,Archivos,Archivos).
+seleccionarArchivoPorRuta(Ruta,ListaArchivos,ArchivosSeleccionados).
+modificarRutasCarpetas(ListaRutaNueva,N,ListaCarpetasOriginales,ListaNueva).
+modificarRutasArchivos(LRN,N,FileEntrada,FilesSalida).
+seleccionarArchivo(Name_d,Ruta,Archivos,File).
+modificarRutaArchivo(File,Ruta,Archivo).
+actualizarFechaArchivo(File,Ruta,Archivo).
+modificarNombreArchivo(File,NewName,NewFile).
+subdirectoriosDirectos(CarpetaOriginales,N,CarpetasSalida).
+nombresArchivosRuta(Ruta,Files,Nombres).
+insertarLista(L1,L2,LR).
+oculto(Nombres,NombresResultantes).
+invertir(Lista,ListaInvertida).
+getCapacidadDrive(Drive,Capacidad).
+eliminarDrive(Letra,Drives,DriveSalida).
+*/
+/*
+Metas:
+Principales:system,systemAddDrive,systemRegister,systemLogin,systemLogout,
+	systemSwitchDrive,systemMkdir,systemCd,systemAddFile,systemDel,
+	systemCopy,systemMove,systemRen,systemDir,systemFormat
+Secundarias:get_time,getNameSystem,getFechaSystem,getLetraSystem,getUsuarioSystem,
+	getRutaSystem,getDrives,getCarpetas,getArchivos,getUsers,getPapelera,drive,
+	buscar_drive,insertarCola,folder,user,buscar_usuario,no_sesion_iniciada,
+	buscar_carpeta,eliminarUltimoElemento,formarRuta,fileRuta,carpetaPorRuta,
+	archivosPorRuta,noCarpetasPorRuta,noArchivosPorRuta,insertarCarpetas,
+	insertarArchivos,eliminarArchivo,seleccionarArchivo,modificarRutasCarpetas,
+	modificarRutasArchivos,seleccionarArchivo,modificarRutaArchivo,
+	actualizarFechaArchivo,modificarNombreArchivo,subdirectoriosDirectos,
+	nombresArchivosRuta,insertarLista,oculto,invertir,getCapacidadDrive,
+	eliminarDrive.
+*/
+
 %REQUERIMIENTOS FUNCIONALES
 
-%predicado: 
-%dominio: Name (string) x System
+%Descripción: Construye un system.
+%dominio: Name (string) x System.
 system(Name,System):-string(Name),
 	date(Date),
 	System=[Name,Date,"","","",[],[],[],[],[]],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
+%Descripción: Crea y agrega un drive a al sistema, siempre y cuando no exista uno con el mismo nombre.
+%Dominios: SB (sytem) x SA (System).
 systemAddDrive(SB,Letter,Name,Capacity,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -69,6 +148,7 @@ systemAddDrive(SB,Letter,Name,Capacity,SA):-getNameSystem(SB,Name_system),
 	getUsers(SB,Users),
 	getPapelera(SB,Papelera),
 	string_lower(Letter,Letter_down),
+	string_length(Letter_down,1),
 	drive(Letter_down,Name,Capacity,Drive),
 	not(buscar_drive(Drives,Letter_down)),
 	insertarCola(Drive,Drives,NewDrives),
@@ -78,6 +158,24 @@ systemAddDrive(SB,Letter,Name,Capacity,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,NewDrives,Carpetas_new,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
+%Descripción: Crea y registra un usuario en el sistema, siempre y cuando no exista otro usuario con el mismo nombre. Si el usuario ya existe, SB será igual a SA.
+%Dominios: SB (sytem) x UserName (String) x SA (System).
+systemRegister(SB,UserName,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getRutaSystem(SB,Ruta),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	buscar_usuario(Users,UserName),
+	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,Archivos,Users,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+%Descripción: Crea y registra un usuario en el sistema, siempre y cuando no exista otro usuario con el mismo nombre.
+%Dominios: SB (sytem) x UserName (String) x SA (System).
 systemRegister(SB,UserName,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -93,7 +191,9 @@ systemRegister(SB,UserName,SA):-getNameSystem(SB,Name_system),
 	insertarCola(U,Users,NewUsers),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,Archivos,NewUsers,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
-	
+
+%Descripción: Inicia sesión con el nombre de un usuario, siempre y cuando no exista otro usuario con la sesión iniciada.
+%Dominios: SB (sytem) x UserName (String) x SA (System).
 systemLogin(SB,UserName,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -104,22 +204,27 @@ systemLogin(SB,UserName,SA):-getNameSystem(SB,Name_system),
 	getUsers(SB,Users),
 	getPapelera(SB,Papelera),
 	buscar_usuario(Users,UserName),
-	no_sesion_iniciada(SB,""),
 	SA=[Name_system,Fecha,Letra,UserName,Ruta,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
+%Descripción: Cierra la sesión de un usuario en el sistema. No se puede cerrar sesión si no hay una sesión iniciada.
+%Dominios: SB (sytem) x SA (System).
 systemLogout(SB,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
 	getRutaSystem(SB,Ruta),
+	getUsuarioSystem(SB,Usuario),
 	getDrives(SB,Drives),
 	getCarpetas(SB,Carpetas),
 	getArchivos(SB,Archivos),
 	getUsers(SB,Users),
 	getPapelera(SB,Papelera),
+	Usuario \= "",
 	SA=[Name_system,Fecha,Letra,"",Ruta,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
+%Descripción: Fija la unidad en la que el usuario realizara las acciones. Debe existir una sesión iniciada para ejecutarse.
+%Dominios: SB (sytem) x Letter (String) x SA (System).
 systemSwitchDrive(SB,Letter,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -136,6 +241,8 @@ systemSwitchDrive(SB,Letter,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letter_down,Usuario,Ruta,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
+%Descripción: Crea y agrega un directorio al sistema, siempre y cuando no exista otro directorio con el mismo nombre en la misma ruta.
+%Dominios: SB (sytem) x Name (String) x SA (System).
 systemMkdir(SB,Name,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -155,8 +262,8 @@ systemMkdir(SB,Name,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas_new,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%SYSTEMCD
-%RETROCEDER ".."
+%Descripción: Cambia la ruta actual del sistema por medio de un nombre. Esta regla devuelve al sistema a la carpeta padre.
+%Dominios: SB (sytem) x Name (String) x SA (System).
 systemCd(SB,"..",SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -175,7 +282,8 @@ systemCd(SB,"..",SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta4,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%VOLVER A ROOT "/"
+%Descripción: Cambia la ruta actual del sistema por medio de un nombre. Esta regla devuelve al sistema a la carpeta root del drive.
+%Dominios: SB (sytem) x Name (String) x SA (System).
 systemCd(SB,"/",SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -189,7 +297,8 @@ systemCd(SB,"/",SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,NewRuta,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%SIMPLE ########
+%Descripción: Cambia la ruta actual del sistema por medio de un nombre.
+%Dominios: SB (sytem) x Name (String) x SA (System).
 systemCd(SB,Name,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -207,6 +316,31 @@ systemCd(SB,Name,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Name_ruta,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
+/*
+HACER CLAUSULA QUE BUSQUE EL NOMBRE DEL ARCHIVO Y VERIFIQUE SI TIENE EL MISMO NOMBRE
+%Descripción: Añade un archivo al sistema, siempre y cuando el nombre del archivo no exista en la misma ruta.
+%Dominios: SB (sytem) x File x SA (System).
+systemAddFile(SB,File,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getRutaSystem(SB,Ruta),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	getFilename(File,Filename),
+	buscar_archivo(Archivos,Ruta,Filename),
+	seleccionarArchivo(Filename,Ruta,Archivos,FileOld),
+	eliminarArchivo(Filename,Ruta,Archivos,ArchivosSinEliminado),
+	insertarCola(FileRuta,Archivos,Archivos_new),
+	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,Archivos_new,Users,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+*/
+
+%Descripción: Añade un archivo al sistema, siempre y cuando el nombre del archivo no exista en la misma ruta.
+%Dominios: SB (sytem) x File x SA (System).
 systemAddFile(SB,File,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -224,10 +358,8 @@ systemAddFile(SB,File,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,Archivos_new,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-
-%SYSTEMDEL
-
-%CARPETAS
+%Descripción: 
+%Dominios: SB (sytem) x Name (String) x SA (System).
 systemDel(SB,Name,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -252,7 +384,8 @@ systemDel(SB,Name,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,CarpetasDejar,ArchivosDejar,Users,Papelera3],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%ARCHIVOS
+%Descripción: 
+%Dominios: SB (sytem) x Name (String) x SA (System).
 systemDel(SB,Name,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -271,9 +404,8 @@ systemDel(SB,Name,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,NewArchivos,Users,NewPapelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%SYSTEMCOPY
-
-%CARPETAS
+%Descripción: Copia un archivo o carpeta desde una ruta origen a una ruta destino. Esta regla funciona para carpetas.
+%Dominios: SB (sytem) x Source (String) x TargetPath (String) x SA (System).
 systemCopy(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -305,7 +437,8 @@ systemCopy(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,NewCarpetas,NewArchivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%ARCHIVOS
+%Descripción: Copia un archivo o carpeta desde una ruta origen a una ruta destino. Esta regla funciona solo para archivos.
+%Dominios: SB (sytem) x Source (String) x TargetPath (String) x SA (System).
 systemCopy(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -328,11 +461,8 @@ systemCopy(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,NewArchivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%SYSTEMMOVE
-
-%ARREGLAR MOVERLA A SI MISMA
-
-%CARPETAS
+%Descripción: Mueve un archivo o carpeta desde una ruta origen a una ruta destino. Esta regla funciona para carpetas.
+%Dominios: SB (sytem) x Source (String) x TargetPath (String) x SA (System).
 systemMove(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -366,7 +496,8 @@ systemMove(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,NewCarpetas,NewArchivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%ARCHIVOS
+%Descripción: Mueve un archivo o carpeta desde una ruta origen a una ruta destino. Esta regla funciona solo para archivos.
+%Dominios: SB (sytem) x Source (String) x TargetPath (String) x SA (System).
 systemMove(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -390,10 +521,8 @@ systemMove(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,NewArchivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-
-%SYSTEMREN
-
-%CARPETAS
+%Descripción: Renombra una carpeta o archivo que no viole la restricción de unicidad. Esta regla funciona para carpetas.
+%Dominios: SB (sytem) x CurrentName (String) x NewName (String) x SA (System).
 systemRen(SB,CurrentName,NewName,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -426,7 +555,8 @@ systemRen(SB,CurrentName,NewName,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,NewCarpetas,NewArchivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%ARCHIVOS
+%Descripción: Renombra una carpeta o archivo que no viole la restricción de unicidad. Esta regla funciona solo para archivos.
+%Dominios: SB (sytem) x CurrentName (String) x NewName (String) x SA (System).
 systemRen(SB,CurrentName,NewName,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -448,10 +578,8 @@ systemRen(SB,CurrentName,NewName,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,NewArchivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-
-%SYSTEMDIR
-
-%VERSIÓN_SIMPLE
+%Descripción: 
+%Dominios: SB (sytem) x 
 systemDir(Sys,[],String):-getRutaSystem(Sys,Ruta),
 	getCarpetas(Sys,Carpetas),
 	getArchivos(Sys,Archivos),
@@ -467,7 +595,8 @@ systemDir(Sys,[],String):-getRutaSystem(Sys,Ruta),
 	string_concat("\n",StringN,String),
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%Opción: "/a"
+%Descripción: 
+%Dominios: SB (sytem) x 
 systemDir(Sys,["/a"],String):-getRutaSystem(Sys,Ruta),
 	getCarpetas(Sys,Carpetas),
 	getArchivos(Sys,Archivos),
@@ -484,6 +613,8 @@ systemDir(Sys,["/a"],String):-getRutaSystem(Sys,Ruta),
 
 /*
 %Opción: "/s"
+%Descripción: 
+%Dominios: SB (sytem) x 
 systemDir(Sys,["/s"],String):-getRutaSystem(Sys,Ruta),
 	getCarpetas(Sys,Carpetas),
 	getArchivos(Sys,Archivos),
@@ -507,6 +638,8 @@ systemDir(Sys,["/s"],String):-getRutaSystem(Sys,Ruta),
 */
 /*
 %Opción: "/s /a"
+%Descripción: 
+%Dominios: SB (sytem) x
 systemDir(Sys,["/s"],String):-getRutaSystem(Sys,Ruta),
 	getCarpetas(Sys,Carpetas),
 	getArchivos(Sys,Archivos),
@@ -529,6 +662,8 @@ systemDir(Sys,["/s"],String):-getRutaSystem(Sys,Ruta),
 */
 
 %Opción: "/o N"
+%Descripción: 
+%Dominios: SB (sytem) x 
 systemDir(Sys,["/o N"],String):-getRutaSystem(Sys,Ruta),
 	getCarpetas(Sys,Carpetas),
 	getArchivos(Sys,Archivos),
@@ -546,6 +681,8 @@ systemDir(Sys,["/o N"],String):-getRutaSystem(Sys,Ruta),
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
 %Opción: "/o -N"
+%Descripción: 
+%Dominios: SB (sytem) x 
 systemDir(Sys,["/o -N"],String):-getRutaSystem(Sys,Ruta),
 	getCarpetas(Sys,Carpetas),
 	getArchivos(Sys,Archivos),
@@ -563,10 +700,8 @@ systemDir(Sys,["/o -N"],String):-getRutaSystem(Sys,Ruta),
 	string_concat("\n",StringN,String),
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-
-%SYSTEMFORMAT
-
-%Formatea la unidad actual
+%Descripción: Formatea una unidad dada su letra y cambia su nombre. Esta regla es cuando se formatea una unidad que es la actual.
+%Dominios: SB (sytem) x Letter (String) x Name (String) x SA (System).
 systemFormat(SB,Letter,Name,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
@@ -592,7 +727,8 @@ systemFormat(SB,Letter,Name,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Root,NewDrives,NewCarpetas,NewArchivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%Formatea otra unidad
+%Descripción: Formatea una unidad dada su letra y cambia su nombre. Esta regla es cuando se formatea una unidad que no es la actual.
+%Dominios: SB (sytem) x Letter (String) x Name (String) x SA (System).
 systemFormat(SB,Letter,Name,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
