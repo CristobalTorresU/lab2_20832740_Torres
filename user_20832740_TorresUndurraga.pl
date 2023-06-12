@@ -6,6 +6,8 @@
 %TDA user
 /*
 REPRESENTACIÓN:
+User se representa por una lista con 2 elementos. El 1ero es el nombre de usuario y
+el 2do es la fecha en que se registró.
 
 */
 /*
@@ -26,7 +28,7 @@ Secundarias: getNombreUser,buscar_usuario,no_sesion_iniciada.
 %Descripción: Construye un user (usuario).
 %Dominios: Nombre (String) x User
 user(Nombre,User):-string(Nombre),
-	date(Date),
+	get_time(Date),
 	User=[Nombre,Date].
 
 %SELECTORES

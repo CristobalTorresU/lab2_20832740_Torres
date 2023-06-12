@@ -6,6 +6,8 @@
 %TDA drive
 /*
 REPRESENTACIÓN:
+Cada drive se representa por una lista de 3 elementos. En la 1era posición se encuentra
+la letra del drive, en 2da el nombre del drive y en la 3ra su capacidad.
 
 */
 /*

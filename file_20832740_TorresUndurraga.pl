@@ -1,11 +1,14 @@
 %MODULOS
-:-module(file_20832740_TorresUndurraga,[file/3,fileRuta/3,getFilename/2,seleccionarArchivo/4,eliminarArchivo/4,modificarRutaArchivo/3,modificarNombreArchivo/3,buscar_archivo/3,seleccionarArchivosPorRuta/3,nombresArchivosRuta/3,archivosDeCarpetas/3,insertarArchivos/3,oculto/2,archivosPorRuta/3,noArchivosPorRuta/3,modificarRutasArchivos/4,archivosPorRutaTipo/4,buscar_archivos/2,modificarRutaArchivosDirecto/3,actualizarFechaArchivo/2,getFechaCreacionFileRuta/2,modificarFechaArchivo/3]).
+:-module(file_20832740_TorresUndurraga,[file/3,fileRuta/3,getFilename/2,seleccionarArchivo/4,eliminarArchivo/4,modificarRutaArchivo/3,modificarNombreArchivo/3,buscar_archivo/3,seleccionarArchivosPorRuta/3,nombresArchivosRuta/3,archivosDeCarpetas/3,insertarArchivos/3,oculto/2,archivosPorRuta/3,noArchivosPorRuta/3,modificarRutasArchivos/4,archivosPorRutaTipo/4,buscar_archivos/2,modificarRutaArchivosDirecto/3,actualizarFechaArchivo/2,getFechaCreacionFileRuta/2,modificarFechaArchivo/3,sourceTipo/2]).
 
 %##############################################################################
 
 %TDA file
 /*
 REPRESENTACIÓN:
+File se representa por una lista con 2 elementos. El 1ero es el directorio en que se
+encuentra el archivo, y la 2da posición es una lista de 4 elementos, que contiene el
+nombre, tipo, contenido y fecha de creación.
 
 */
 /*
@@ -31,17 +34,21 @@ archivosPorRuta(Ruta,Archivos,ListaArchivosNuevos).
 noArchivosPorRuta(Ruta,Archivos,ListaArchivosNuevos).
 modificarRutasArchivos(LRN,N,FileEntrada,FilesSalida).
 actualizarFechaArchivo(File,Ruta,Archivo).
-modificarFechaArchivo().
+modificarFechaArchivo(Fecha,FileEntrada,FileSalida).
+archivosPorRutaTipo(Ruta,FilesEntrada,FilesSalida).
+buscar_archivos(ArchivosBuscados,Archivos).
+sourceTipo(Nombre,Tipo).
 */
 /*
 Metas:
-Principales: fileRuta
-Secundarias: file,getFilename,getContenido,getFechaCreacion,
+Principales: file,fileRuta.
+Secundarias: getFilename,getContenido,getFechaCreacion,
 	seleccionarArchivo,eliminarArchivo,modificarRutaArchivo,
 	modificarNombreArchivo,buscar_archivo,seleccionarArchivoPorRuta,
 	nombresArchivosRuta,archivosDeCarpetas,insertarArchivos,oculto,
 	archivosPorRuta,noArchivosPorRuta,modificarRutasArchivos,
-	actualizarFechaArchivo,modificarFechaArchivo.
+	actualizarFechaArchivo,modificarFechaArchivo,buscar_archivos,
+	archivosPorRutaTipo,sourceTipo.
 */
 
 %CONSTRUCTORES
@@ -111,7 +118,8 @@ modificarRutaArchivosDirecto(Ruta,[[_,[Nombre,Tipo,Contenido,Fecha]]|T],[[Ruta,[
 
 %Descripción: Modifica el nombre de un archivo.
 %Dominios: File x NewName (String) X Archivo (File).
-modificarNombreArchivo([Ruta,[_,Tipo,Contenido,Fecha]],NewName,Archivo):-Archivo=[Ruta,[NewName,Tipo,Contenido,Fecha]].
+modificarNombreArchivo([Ruta,[_,_,Contenido,Fecha]],NewName,Archivo):-split_string(NewName,".",".",[_,Tipo]),
+	Archivo=[Ruta,[NewName,Tipo,Contenido,Fecha]].
 
 %OTRAS OPERACIONES
 
@@ -138,8 +146,8 @@ nombresArchivosRuta(_,[],_):-!.
 nombresArchivosRuta(Ruta,[[Ruta,[Nombre,_,_,_]]|T],[Nombre|Tout]):-nombresArchivosRuta(Ruta,T,Tout),!.
 nombresArchivosRuta(Ruta,[_|T],Tout):-nombresArchivosRuta(Ruta,T,Tout).
 
-%Descripción: 
-%Dominios: 
+%Descripción: Busca y selecciona todos los archivos que provengan de una carpeta.
+%Dominios: Carpetas (lista de folders) x Archivos (Lista de files) x NewArchivos (Lista de files).
 archivosDeCarpetas([],_,_):-!.
 archivosDeCarpetas([[Ruta,_,_,_]|T],Archivos,Tin):-seleccionarArchivosPorRuta(Ruta,Archivos,ArchivosSeleccionados),
 	insertarLista(ArchivosSeleccionados,Tin,Tout),archivosDeCarpetas(T,Archivos,Tout),!.
@@ -215,9 +223,16 @@ archivosPorRutaTipo(Ruta1,Tipo1,[[Ruta2,[Nombre,Tipo2,Contenido,FC]]|T],Tout):-
 	archivosPorRutaTipo(Ruta1,Tipo1,T,Tin),!.
 archivosPorRutaTipo(Ruta,Tipo,[H|T],[H|Tout]):-archivosPorRutaTipo(Ruta,Tipo,T,Tout).
 
-%Descripción:
-%Dominios:
+%Descripción: Busca los si existen una lista de archivos en otra lista de archivos.
+%Dominios: ArchivosBuscados (lista de files) x Archivos (lista de files).
 buscar_archivos([[Ruta,[Filename,_,_,_]]|_],Archivos):-buscar_archivo(Archivos,Ruta,Filename),!.
 buscar_archivos([_|T],Archivos):-buscar_archivos(T,Archivos).
+
+%Descripción: Selecciona el tipo de archivo desde un nombre.
+%Dominios: Source (String) x Tipo (String)
+sourceTipo(Source,Tipo):-atom_chars(Source,[H1,H2|_]),
+	atom_string(H1,"*"),
+	atom_string(H2,"."),
+	split_string(Source,".",".",[_,Tipo]).
 
 

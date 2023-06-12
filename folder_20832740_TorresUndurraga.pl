@@ -6,6 +6,8 @@
 %TDA folder
 /*
 REPRESENTACIÓN:
+Folder se representa como una lista de 4 elementos, que contienen el directorio en que
+se encuentra, el nombre del creador, la fecha de creación y la fecha de modificación.
 
 */
 /*
@@ -41,7 +43,7 @@ Secundarias: getNombreFolder,getCreadorFolder,getFechaCreacionFolder,
 %Descripción: Construye una folder (Carpeta).
 %Dominios: Ruta (String) x Nombre_carpeta (String) x Creador (String) x Carpeta (folder)
 folder(Ruta,Nombre_carpeta,Creador,Carpeta):-string(Nombre_carpeta),
-	date(Fecha_creacion),
+	get_time(Fecha_creacion),
 	string_concat(Ruta,Nombre_carpeta,Nombre),
 	string_concat(Nombre,"/",Nombre_ruta),
 	Carpeta=[Nombre_ruta,Creador,Fecha_creacion,Fecha_creacion].
@@ -73,7 +75,7 @@ getFechaModificacionFolder([_,_,_,Fecha_mod],Fecha_mod).
 cambiarFechaModificacion(Carpeta,Nueva_carpeta):-getNombreFolder(Carpeta,Nombre),
 	getCreadorFolder(Carpeta,Creador),
 	getFechaCreacionFolder(Carpeta,Fecha_c),
-	date(Fecha_nueva),
+	get_time(Fecha_nueva),
 	getArchivosFolder(Carpeta,Archivos),
 	Nueva_carpeta=[Nombre,Creador,Fecha_c,Fecha_nueva,Archivos].
 

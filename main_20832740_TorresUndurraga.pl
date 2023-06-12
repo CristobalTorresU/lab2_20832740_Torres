@@ -7,50 +7,6 @@
 
 %##############################################################################
 
-%CLASULAS EXTRAS
-%
-getCabeza([E|_],E).
-
-%insertarCola(Elemento,ListaEntrante,ListaSalida).
-insertarCola(E,[],[E]).
-insertarCola(E,[H|T],[H|Tout]):-insertarCola(E,T,Tout).
-
-%eliminarElemento(Elemento,ListaEntrante,ListaSalida)
-eliminarElemento(_,[],[]):-!.
-eliminarElemento(E,[E|T],Tout):-eliminarElemento(E,T,Tout),!.
-eliminarElemento(E,[H|T],[H|Tout]):-eliminarElemento(E,T,Tout).
-
-%eliminarUltimoElemento(L1,L2).
-eliminarUltimoElemento([_|[]],[]):-!.
-eliminarUltimoElemento([H|T],[H|Tout]):-eliminarUltimoElemento(T,Tout).
-
-%eliminarNelementos(LI,N,LR).
-eliminarNelementos(0,T,T):-!.
-eliminarNelementos(N,[_|T],Tout):-N > 0,Naux is N - 1,eliminarNelementos(Naux,T,Tout).
-
-%formarRuta(ListaNombres,Ruta).
-formarRuta(L,R):-atomic_list_concat(L,"/",S1),string_concat(S1,"/",R).
-
-%sublista(L1,L2).
-sublista(_,[]):-false.
-sublista([],_):-!.
-sublista([R1|T1],[R1|T2]):-sublista(T1,T2).
-
-%insertarLista(L1,L2,LR).
-insertarLista([],[],[]):-!.
-insertarLista([H1|T1],[],[H1|T3]):-insertarLista(T1,[],T3),!.
-insertarLista(L,[H2|T2],[H2|T3]):-insertarLista(L,T2,T3).
-
-%ultimoElemento(Lista,Elemento).
-ultimoElemento([T|[]],T):-!.
-ultimoElemento([_|T],E):-ultimoElemento(T,E).
-
-%invertir(Lista,ListaInvertida).
-invertir([],[]):-!.
-invertir(L,[Ultimo|T]):-ultimoElemento(L,Ultimo),eliminarUltimoElemento(L,LSinUltimo),invertir(LSinUltimo,T),!.
-
-%##############################################################################
-
 /*
 Predicados:
 system(SA,Name,SB).
@@ -110,6 +66,7 @@ oculto(Nombres,NombresResultantes).
 invertir(Lista,ListaInvertida).
 getCapacidadDrive(Drive,Capacidad).
 eliminarDrive(Letra,Drives,DriveSalida).
+sourceTipo(Source,Tipo).
 */
 /*
 Metas:
@@ -125,15 +82,15 @@ Secundarias:get_time,getNameSystem,getFechaSystem,getLetraSystem,getUsuarioSyste
 	modificarRutasArchivos,seleccionarArchivo,modificarRutaArchivo,
 	actualizarFechaArchivo,modificarNombreArchivo,subdirectoriosDirectos,
 	nombresArchivosRuta,insertarLista,oculto,invertir,getCapacidadDrive,
-	eliminarDrive.
+	eliminarDrive,sourceTipo.
 */
 
-%REQUERIMIENTOS FUNCIONALES
+%REQUERIMIENTOS FUNCIONALES------------------------------------------------------------
 
 %Descripción: Construye un system.
 %dominio: Name (string) x System.
 system(Name,System):-string(Name),
-	date(Date),
+	get_time(Date),
 	System=[Name,Date,"","","",[],[],[],[],[]],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
@@ -194,11 +151,18 @@ systemRegister(SB,UserName,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,Archivos,NewUsers,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
+
+%Descripción: Inicia sesión con el nombre de un usuario. Si es el mismo usuario actual no se realizan cambios.
+%Dominios: SB (sytem) x UserName (String) x SA (System).
+systemLogin(SB,UserName,SB):-getUsuarioSystem(SB,UserName),
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
 %Descripción: Inicia sesión con el nombre de un usuario, siempre y cuando no exista otro usuario con la sesión iniciada.
 %Dominios: SB (sytem) x UserName (String) x SA (System).
 systemLogin(SB,UserName,SA):-getNameSystem(SB,Name_system),
 	getFechaSystem(SB,Fecha),
 	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,""),
 	getRutaSystem(SB,Ruta),
 	getDrives(SB,Drives),
 	getCarpetas(SB,Carpetas),
@@ -296,6 +260,43 @@ systemCd(SB,"/",SA):-getNameSystem(SB,Name_system),
 	getUsers(SB,Users),
 	getPapelera(SB,Papelera),
 	string_concat(Letra,":/",NewRuta),
+	SA=[Name_system,Fecha,Letra,Usuario,NewRuta,Drives,Carpetas,Archivos,Users,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+%Descripción: Cambia la ruta actual directamente a otra qua ya existe.
+%Dominios: SB (sytem) x Name (String) x SA (System).
+systemCd(SB,Name,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	string_lower(Name,Name_down),
+	buscar_carpeta(Carpetas,Name_down),
+	SA=[Name_system,Fecha,Letra,Usuario,Name_down,Drives,Carpetas,Archivos,Users,Papelera],
+	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
+
+%Descripción: Cambia la ruta actual del sistema por medio de un nombre. Esta variación de la regla devuelve al sistema a la carpeta root del drive y después a una ruta específica. 
+%Dominios: SB (sytem) x Name (String) x SA (System).
+systemCd(SB,Name,SA):-getNameSystem(SB,Name_system),
+	getFechaSystem(SB,Fecha),
+	getLetraSystem(SB,Letra),
+	getUsuarioSystem(SB,Usuario),
+	getDrives(SB,Drives),
+	getCarpetas(SB,Carpetas),
+	getArchivos(SB,Archivos),
+	getUsers(SB,Users),
+	getPapelera(SB,Papelera),
+	string_lower(Name,Name_d),
+	atom_chars(Name_d,[PrimerChar|_]),
+	atom_string(PrimerChar,"/"),
+	string_concat(Letra,":",Raiz),
+	string_concat(Raiz,Name,RutaSinSlash),
+	string_concat(RutaSinSlash,"/",NewRuta),
+	buscar_carpeta(Carpetas,NewRuta),
 	SA=[Name_system,Fecha,Letra,Usuario,NewRuta,Drives,Carpetas,Archivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
@@ -408,17 +409,6 @@ systemDel(SB,Name,SA):-getNameSystem(SB,Name_system),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,NewArchivos,Users,NewPapelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%------------------------------------------------------------------------------------
-%------------------------------------------------------------------------------------
-%------------------------------------------------------------------------------------
-%------------------------------------------------------------------------------------
-%------------------------------------------------------------------------------------
-
-source*tipo(Source,Tipo):-atom_chars(Source,[H1,H2|_]),
-	atom_string(H1,"*"),
-	atom_string(H2,"."),
-	split_string(Source,".",".",[_,Tipo]).
-
 %Descripción: Copia un archivo o carpeta desde una ruta origen a una ruta destino.
 %Dominios: SB (sytem) x Source (String) x TargetPath (String) x SA (System).
 %Formato Source = "*._"
@@ -433,110 +423,13 @@ systemCopy(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
 	getUsers(SB,Users),
 	getPapelera(SB,Papelera),
 	string_lower(Source,Source_d),
-	source*tipo(Source_d,Tipo),
+	sourceTipo(Source_d,Tipo),
 	string_lower(TargetPath,TargetPath_d),
 	archivosPorRutaTipo(Ruta,Tipo,Archivos,ArchivosPorCopiar),
 	modificarRutaArchivosDirecto(TargetPath_d,ArchivosPorCopiar,ArchivosListos),
 	not(buscar_archivos(ArchivosListos,Archivos)),
 	insertarArchivos(ArchivosListos,Archivos,NewArchivos),	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,NewArchivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
-	
-	
-/*
-%Descripción: Copia un archivo o carpeta desde una ruta origen a una ruta destino.
-%Dominios: SB (sytem) x Source (String) x TargetPath (String) x SA (System).
-%a*
-systemCopy(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
-	getFechaSystem(SB,Fecha),
-	getLetraSystem(SB,Letra),
-	getUsuarioSystem(SB,Usuario),
-	getRutaSystem(SB,Ruta),
-	getDrives(SB,Drives),
-	getCarpetas(SB,Carpetas),
-	getArchivos(SB,Archivos),
-	getUsers(SB,Users),
-	getPapelera(SB,Papelera),
-	string_lower(Source,Source_d),
-	source*tipo(Source_d,Tipo),
-	string_lower(TargetPath,TargetPath_d),
-	archivosPorRutaTipo(Ruta,Tipo,Archivos,ArchivosPorCopiar),
-	modificarRutaArchivosDirecto(TargetPath_d,ArchivosPorCopiar,ArchivosListos),
-	not(buscar_archivos(ArchivosListos,Archivos)),
-	insertarArchivos(ArchivosListos,Archivos,NewArchivos),
-		SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,NewCarpetas,NewArchivos,Users,Papelera],
-	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
-
-*/
-
-/*
-%Descripción: Copia un archivo o carpeta desde una ruta origen a una ruta destino. Esta regla funciona para carpetas.
-%Dominios: SB (sytem) x Source (String) x TargetPath (String) x SA (System).
-systemCopy(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
-	getFechaSystem(SB,Fecha),
-	getLetraSystem(SB,Letra),
-	getUsuarioSystem(SB,Usuario),
-	getRutaSystem(SB,Ruta),
-	getDrives(SB,Drives),
-	getCarpetas(SB,Carpetas),
-	getArchivos(SB,Archivos),
-	getUsers(SB,Users),
-	getPapelera(SB,Papelera),
-	string_lower(Source,Source_d),
-	string_lower(TargetPath,TargetPath_d),
-	string_concat(Ruta,Source_d,RutaSource1),
-	string_concat(RutaSource1,"/",RutaSource2),
-	buscar_carpeta(Carpetas,RutaSource2),
-	buscar_carpeta(Carpetas,TargetPath_d),
-	string_concat(TargetPath_d,Source_d,TPD),
-	string_concat(TPD,"/",Target),
-	not(buscar_carpeta(Carpetas,Target)),
-	split_string(RutaSource2,"/","/",RutaLista),
-	carpetasPorRuta(RutaLista,Carpetas,CarpetasPorCopiar),
-	archivosPorRuta(RutaLista,Archivos,ArchivosPorCopiar),
-	split_string(Target,"/","/",TargetLista),
-	length(RutaLista,N),
-	modificarRutasCarpetas(TargetLista,N,CarpetasPorCopiar,CarpetasListas),
-	modificarRutasArchivos(TargetLista,N,ArchivosPorCopiar,ArchivosListos),
-	insertarCarpetas(CarpetasListas,Carpetas,NewCarpetas),
-	insertarArchivos(ArchivosListos,Archivos,NewArchivos),
-	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,NewCarpetas,NewArchivos,Users,Papelera],
-	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
-*/
-
-/*
-%Descripción: Copia un archivo o carpeta desde una ruta origen a una ruta destino. Esta regla funciona para carpetas.
-%Dominios: SB (sytem) x Source (String) x TargetPath (String) x SA (System).
-systemCopy(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
-	getFechaSystem(SB,Fecha),
-	getLetraSystem(SB,Letra),
-	getUsuarioSystem(SB,Usuario),
-	getRutaSystem(SB,Ruta),
-	getDrives(SB,Drives),
-	getCarpetas(SB,Carpetas),
-	getArchivos(SB,Archivos),
-	getUsers(SB,Users),
-	getPapelera(SB,Papelera),
-	string_lower(Source,Source_d),
-	string_lower(TargetPath,TargetPath_d),
-	string_concat(Ruta,Source_d,RutaSource1),
-	string_concat(RutaSource1,"/",RutaSource2),
-	buscar_carpeta(Carpetas,RutaSource2),
-	buscar_carpeta(Carpetas,TargetPath_d),
-	string_concat(TargetPath_d,Source_d,TPD),
-	string_concat(TPD,"/",Target),
-	not(buscar_carpeta(Carpetas,Target)),
-	split_string(RutaSource2,"/","/",RutaLista),
-	carpetasPorRuta(RutaLista,Carpetas,CarpetasPorCopiar),
-	archivosPorRuta(RutaLista,Archivos,ArchivosPorCopiar),
-	split_string(Target,"/","/",TargetLista),
-	length(RutaLista,N),
-	modificarRutasCarpetas(TargetLista,N,CarpetasPorCopiar,CarpetasListas),
-	modificarRutasArchivos(TargetLista,N,ArchivosPorCopiar,ArchivosListos),
-	insertarCarpetas(CarpetasListas,Carpetas,NewCarpetas),
-	insertarArchivos(ArchivosListos,Archivos,NewArchivos),
-	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,NewCarpetas,NewArchivos,Users,Papelera],
-	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
-*/
 
 %Descripción: Copia un archivo o carpeta desde una ruta origen a una ruta destino. Esta regla funciona para carpetas.
 %Dominios: SB (sytem) x Source (String) x TargetPath (String) x SA (System).
@@ -594,13 +487,6 @@ systemCopy(SB,Source,TargetPath,SA):-getNameSystem(SB,Name_system),
 	insertarCola(File3,Archivos,NewArchivos),
 	SA=[Name_system,Fecha,Letra,Usuario,Ruta,Drives,Carpetas,NewArchivos,Users,Papelera],
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
-
-
-%------------------------------------------------------------------------------------
-%------------------------------------------------------------------------------------
-%------------------------------------------------------------------------------------
-%------------------------------------------------------------------------------------
-%------------------------------------------------------------------------------------
 
 %Descripción: Mueve un archivo o carpeta desde una ruta origen a una ruta destino. Esta regla funciona para carpetas, si es que la carpeta ya existe en el destino.
 %Dominios: SB (sytem) x Source (String) x TargetPath (String) x SA (System).
@@ -800,7 +686,7 @@ systemDir(Sys,[],String):-getRutaSystem(Sys,Ruta),
 	string_concat("\n",StringN,String),
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
-%Descripción: 
+%Descripción: Lista los archivos y carpeta del directorio actual, incluyendo los ocultos.
 %Dominios: SB (sytem) x Parametros [lista de strings] x String
 systemDir(Sys,["/a"],String):-getRutaSystem(Sys,Ruta),
 	getCarpetas(Sys,Carpetas),
@@ -815,56 +701,6 @@ systemDir(Sys,["/a"],String):-getRutaSystem(Sys,Ruta),
 	atom_string(String_atomo1,StringN),
 	string_concat("\n",StringN,String),
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
-
-/*
-%Opción: "/s"
-%Descripción: 
-%Dominios: SB (sytem) x Parametros [lista de strings] x String
-systemDir(Sys,["/s"],String):-getRutaSystem(Sys,Ruta),
-	getCarpetas(Sys,Carpetas),
-	getArchivos(Sys,Archivos),
-	
-	split_string(Ruta,"/","/",RutaLista),
-	length(RutaLista,N),
-	carpetasPorRuta(RutaLista,Carpetas,CarpetasSeleccionadas),
-	%archivosPorRuta(RutaLista,Archivos,ArchivosPorMover),
-
-	subdirectoriosDirectos(CarpetasSeleccionadas,N,ListaNombresCarpetas),
-
-	nombresArchivosRuta(Ruta,Archivos,ListaNombresArchivos),
-	insertarLista(ListaNombresArchivos,ListaNombresCarpetas,ListaNombres),
-	atomic_list_concat(ListaNombres,"\n",String_atomo1),
-	atom_string(String_atomo1,StringN),
-	string_concat("\n",StringN,String),
-	
-	%String = [Carpetas1],
-	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
-
-*/
-/*
-%Opción: "/s /a"
-%Descripción: 
-%Dominios: SB (sytem) x Parametros [lista de strings] x String
-systemDir(Sys,["/s /a"],String):-getRutaSystem(Sys,Ruta),
-	getCarpetas(Sys,Carpetas),
-	getArchivos(Sys,Archivos),
-	
-	split_string(Ruta,"/","/",RutaLista),
-	length(RutaLista,N),
-	carpetasPorRuta(RutaLista,Carpetas,CarpetasSeleccionadas),
-	%archivosPorRuta(RutaLista,Archivos,ArchivosPorMover),
-
-	subdirectoriosDirectos(CarpetasSeleccionadas,N,ListaNombresCarpetas),
-
-	nombresArchivosRuta(Ruta,Archivos,ListaNombresArchivos),
-	insertarLista(ListaNombresArchivos,ListaNombresCarpetas,ListaNombres),
-	atomic_list_concat(ListaNombres,"\n",String_atomo1),
-	atom_string(String_atomo1,StringN),
-	string_concat("\n",StringN,String),
-	
-	%String = [Carpetas1],
-	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
-*/
 
 %Opción: "/o N"
 %Descripción: Lista los archivos y carpetas del directorio actual en orden ascendente.
@@ -908,7 +744,7 @@ systemDir(Sys,["/o -N"],String):-getRutaSystem(Sys,Ruta),
 %Opción: "/?"
 %Descripción: Muestra el panel de ayuda de systemDir
 %Dominios: SB (sytem) x Parametros [lista de strings] x String
-systemDir(_,["/?"],String):-String="\nAl usar la cláusula 'systemDir' se pueden utilizar las siguientes alternativas:\n[]              lista el contenido del directorio actual\n['/s']          lista el contenido del directorio actual y todos los subdirectorios\n['/a']          lista el contenido del directorio actual incluyendo contenido oculto\n['/o [-]N']     lista el contenido del directorio actual en orden alfabético ascendente o descendente '-'\n/?              muestra este panel",
+systemDir(_,["/?"],String):-String="\nAl usar la cláusula 'systemDir' se pueden utilizar las siguientes alternativas:\n[]              lista el contenido del directorio actual\n['/a']          lista el contenido del directorio actual incluyendo contenido oculto\n['/o [-]N']     lista el contenido del directorio actual en orden alfabético ascendente o descendente '-'\n/?              muestra este panel",
 	set_prolog_flag(answer_write_options,[max_depth(0)]),!.
 
 %Descripción: Formatea una unidad dada su letra y cambia su nombre. Esta regla es cuando se formatea una unidad que es la actual.
